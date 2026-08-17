@@ -1,0 +1,5 @@
+{
+    "name": "llama-server-default",
+    "args": "--model model.gguf --ctx-size 32768 --port 5001 --flash-attn on",
+    "serverBin": "./bin/llama-server"
+}

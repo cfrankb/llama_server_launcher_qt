@@ -1,0 +1,5 @@
+{
+    "name": "mistral7",
+    "args": "Mistral-7B-Instruct-v0.3-Q8_0.gguf --gpulayers 32 --contextsize 24576 --flashattention --quantkv 1 --usecublas",
+    "serverBin": "koboldcpp"
+}
