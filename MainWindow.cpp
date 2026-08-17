@@ -949,9 +949,10 @@ void MainWindow::showEditProfileDialog(const QString &uuid)
 {
     QDialog dialog(this);
     dialog.setWindowTitle(uuid.isEmpty() ? "New Profile" : "Edit Profile");
-    dialog.resize(600, 500);
+    dialog.resize(650, 650);
 
-    QFormLayout *form = new QFormLayout(&dialog);
+    QVBoxLayout *mainLayout = new QVBoxLayout(&dialog);
+    QFormLayout *form = new QFormLayout();
 
     QLineEdit *nameEdit = new QLineEdit(&dialog);
     QLineEdit *descriptionEdit = new QLineEdit(&dialog);
@@ -959,8 +960,10 @@ void MainWindow::showEditProfileDialog(const QString &uuid)
     QComboBox *serverSelector = new QComboBox(&dialog);
     QTextEdit *paramsEdit = new QTextEdit(&dialog);
     QTextEdit *notesEdit = new QTextEdit(&dialog);
-    paramsEdit->setMinimumHeight(100);
+    paramsEdit->setMinimumHeight(120);
+    paramsEdit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     notesEdit->setMinimumHeight(80);
+    notesEdit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     form->addRow("Name:", nameEdit);
     form->addRow("Description:", descriptionEdit);
@@ -974,12 +977,24 @@ void MainWindow::showEditProfileDialog(const QString &uuid)
         }
     }
     form->addRow("Server:", serverSelector);
-    form->addRow("Parameters (one per line):", paramsEdit);
-    form->addRow("Notes:", notesEdit);
+
+    mainLayout->addLayout(form);
+
+    // Parameters section with label above
+    QLabel *paramsLabel = new QLabel("Parameters (one per line):", &dialog);
+    paramsLabel->setStyleSheet("font-weight: bold;");
+    mainLayout->addWidget(paramsLabel);
+    mainLayout->addWidget(paramsEdit);
+
+    // Notes section with label above
+    QLabel *notesLabel = new QLabel("Notes:", &dialog);
+    notesLabel->setStyleSheet("font-weight: bold;");
+    mainLayout->addWidget(notesLabel);
+    mainLayout->addWidget(notesEdit);
 
     QDialogButtonBox *buttonBox = new QDialogButtonBox(
         QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
-    form->addRow(buttonBox);
+    mainLayout->addWidget(buttonBox);
 
     connect(buttonBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
     connect(buttonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
