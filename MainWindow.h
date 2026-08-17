@@ -148,6 +148,7 @@ private:
     QPushButton *m_deleteProfileButton;
     QLabel *m_activeProfileLabel;
     QLabel *m_modelLabel;
+    QLabel *m_pathLabel;
     QLabel *m_statusLabel;
     QPushButton *m_launchButton;
     QPushButton *m_stopButton;

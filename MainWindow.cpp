@@ -41,7 +41,8 @@ MainWindow::MainWindow(QWidget *parent)
     , m_duplicateProfileButton(new QPushButton("Duplicate", this))
     , m_deleteProfileButton(new QPushButton("Delete", this))
     , m_activeProfileLabel(new QLabel("Active Profile: None", this))
-    , m_modelLabel(new QLabel("Model: None", this))
+    , m_pathLabel(new QLabel("Path: ", this))
+    , m_modelLabel(new QLabel("Model: ", this))
     , m_statusLabel(new QLabel("STOPPED", this))
     , m_launchButton(new QPushButton("Launch Server", this))
     , m_stopButton(new QPushButton("Stop Server", this))
@@ -207,6 +208,7 @@ void MainWindow::setupCentralWidget()
     QGroupBox *metadataGroup(new QGroupBox("Metadata", rightWidget));
     QVBoxLayout *metadataLayout = new QVBoxLayout(metadataGroup);
     metadataLayout->addWidget(m_activeProfileLabel);
+    metadataLayout->addWidget(m_pathLabel);
     metadataLayout->addWidget(m_modelLabel);
     metadataLayout->addWidget(m_statusLabel);
     rightLayout->addWidget(metadataGroup);
@@ -274,7 +276,8 @@ void MainWindow::onNewFile()
     m_serverList->clear();
     m_profileList->clear();
     m_activeProfileLabel->setText("Active Profile: None");
-    m_modelLabel->setText("Model: None");
+    m_pathLabel->setText("Path: ");
+    m_modelLabel->setText("Model: ");
     m_statusLabel->setText("STOPPED");
     updateOutput("New empty configuration created.\n");
 }
@@ -492,7 +495,9 @@ void MainWindow::onLaunchServer()
     //m_launchButton->setEnabled(false);
     //m_stopButton->setEnabled(true);
     enableButtons(false, true);
-    m_statusLabel->setText(QString("RUNNING: %1").arg(server.value("name").toString()));
+    m_statusLabel->setText(QString("RUNNING: %1 @ %2")
+                               .arg(server.value("name").toString())
+                               .arg(profile.value("name").toString()));
     m_statusLabel->setStyleSheet("color: green; font-weight: bold;");
     updateOutput(QString("[INFO] Server running (PID: %1)\n").arg(m_activeProcess->processId()));
 }
@@ -503,6 +508,10 @@ void MainWindow::onStopServer()
         updateOutput("\n[INFO] Stopping server...\n");
         m_activeProcess->kill();
         m_activeProcess->waitForFinished(1000);
+
+        // Disconnect all signals before deleting
+        disconnect(m_activeProcess, nullptr, this, nullptr);
+
         m_activeProcess->deleteLater();
         m_activeProcess = nullptr;
         //m_launchButton->setEnabled(true);
@@ -671,7 +680,8 @@ void MainWindow::updateRecentFilesMenu()
     m_recentMenu->clear();
 
     for (const QString &file : m_recentFiles) {
-        QAction *action = new QAction(file, m_recentMenu);
+        const QString filename = QFileInfo(file).fileName();
+        QAction *action = new QAction(filename, m_recentMenu);
         connect(action, &QAction::triggered, this, [this, file]() {
             if (m_configManager->loadFromFile(file)) {
                 m_currentFilePath = file;
@@ -715,7 +725,8 @@ void MainWindow::onProfileSelectionChanged()
     QListWidgetItem *item = m_profileList->currentItem();
     if (!item) {
         m_activeProfileLabel->setText("Active Profile: None");
-        m_modelLabel->setText("Model: None");
+        m_pathLabel->setText("Path: ");
+        m_modelLabel->setText("Model: ");
         return;
     }
 
@@ -726,7 +737,8 @@ void MainWindow::onProfileSelectionChanged()
     QString name = profile.value("name").toString();
     QString modelPath = ConfigManager::resolvePath(profile.value("model_path").toString(), "");
     m_activeProfileLabel->setText("Active Profile: " + name);
-    m_modelLabel->setText("Model: " + modelPath);
+    m_pathLabel->setText("Path: ");
+    m_modelLabel->setText("Model: " + profile.value("model_path").toString());
     updateOutput(QString("Profile selected: %1\n").arg(name));
 }
 
@@ -838,7 +850,8 @@ void MainWindow::updateMetadataDisplay()
     QListWidgetItem *item = m_profileList->currentItem();
     if (!item) {
         m_activeProfileLabel->setText("Active Profile: None");
-        m_modelLabel->setText("Model: None");
+        m_pathLabel->setText("Path: ");
+        m_modelLabel->setText("Model: ");
         return;
     }
 
@@ -849,7 +862,8 @@ void MainWindow::updateMetadataDisplay()
     QString name = profile.value("name").toString();
     QString modelPath = ConfigManager::resolvePath(profile.value("model_path").toString(), "");
     m_activeProfileLabel->setText("Active Profile: " + name);
-    m_modelLabel->setText("Model: " + modelPath);
+    m_pathLabel->setText("Path: ");
+    m_modelLabel->setText("Model: " + profile.value("model_path").toString());
 }
 
 void MainWindow::updateServerStateButtons()
