@@ -90,6 +90,7 @@
             "description": "Ternary Bonsai 27B with draft speculative decoding",
             "model_path": "Ternary-Bonsai-27B-Q2_0.gguf",
             "name": "Ternary-Bonsai-27B-Q2_0",
+            "notes": "# https://huggingface.co/prism-ml/Ternary-Bonsai-27B-gguf/tree/main\n# Ternary-Bonsai-27B-mmproj-\n# need it's own fork\n# 40t/s",
             "parameters": [
                 "--model-draft prism-ml/Ternary-Bonsai-27B/Ternary-Bonsai-27B-dspark-Q4_1.gguf",
                 "--spec-type draft-dspark",
@@ -109,6 +110,7 @@
             "description": "Bonsai 27B with high quantization",
             "model_path": "lmstudio-community/Bonsai-27B-GGUF/Bonsai-27B-Q1_0.gguf",
             "name": "Bonsai-27B-Q1_0",
+            "notes": "# 50t/s",
             "parameters": [
                 "--mmproj lmstudio-community/Bonsai-27B-GGUF/mmproj-Bonsai-27B-BF16.gguf",
                 "-c 16384",
@@ -140,7 +142,8 @@
         {
             "description": "Qwen 3.6 35B uncensored heretic with MoE",
             "model_path": "Qwen3.6-35B-A3B-uncensored-heretic-IQ2_M_HQ.gguf",
-            "name": "Qwen3.6-35B-A3B",
+            "name": "Qwen3.6-35B-A3B_heretic",
+            "notes": "",
             "parameters": [
                 "--n-cpu-moe 32",
                 "--flashattention",
@@ -163,6 +166,7 @@
             "description": "Laguna S 2.1 MOE running on 12GB VRAM",
             "model_path": "laguna-s-2.1-MXFP4_MOE.gguf",
             "name": "laguna-s-2.1-MXFP4_MOE",
+            "notes": "# Running a 118B Model on 12GB VRAM. Better Qwen 35B?\n# https://www.youtube.com/watch?v=NIxCj-3fFNk",
             "parameters": [
                 "--host 127.0.0.1",
                 "--port 5001",
@@ -188,6 +192,7 @@
             "description": "Laguna XS 2.1 Q4_K_M with 50-55t/s throughput",
             "model_path": "poolside/Laguna-XS-2.1-GGUF/Laguna-XS-2.1-Q4_K_M.gguf",
             "name": "laguna-xs2-Q4_K_M",
+            "notes": "#https://huggingface.co/poolside/Laguna-XS-2.1-GGUF\n# 50-55t/s",
             "parameters": [
                 "-np 1",
                 "--host 127.0.0.1",
@@ -215,6 +220,7 @@
             "description": "Laguna XS 2.1 with draft speculative decoding",
             "model_path": "poolside/Laguna-XS-2.1-GGUF/Laguna-XS-2.1-Q4_K_M.gguf",
             "name": "laguna-xs2-Q4_K_M_draft",
+            "notes": "*** RESQUIRES SPECIAL LLAMA BUILD\n\n#https://huggingface.co/poolside/Laguna-XS-2.1-GGUF\n#draft:\n#https://huggingface.co/RespectMathias/Laguna-XS-2.1-DSpark-GGUF\n#45t/s\n\n",
             "parameters": [
                 "--model-draft poolside/Laguna-XS-2.1-GGUF/Laguna-XS-2.1-DSpark-Q8_0.gguf",
                 "--spec-type draft-dspark",
@@ -245,6 +251,7 @@
             "description": "KAT Coder V2.5 Dev APEX Compact with 79t/s",
             "model_path": "mudler/KAT-Coder-V2.5-Dev-APEX-GGUF/KAT-Coder-V2.5-Dev-APEX-I-Compact.gguf",
             "name": "KAT-Coder-V2.5-Dev-Compact",
+            "notes": "#79t/s\n# https://huggingface.co/mudler/KAT-Coder-V2.5-Dev-APEX-GGUF/tree/main",
             "parameters": [
                 "--fit on",
                 "-c 65536",
@@ -264,6 +271,7 @@
             "description": "KAT Coder V2.5 Dev APEX Mini with 107t/s",
             "model_path": "mudler/KAT-Coder-V2.5-Dev-APEX-GGUF/KAT-Coder-V2.5-Dev-APEX-I-Mini.gguf",
             "name": "KAT-Coder-V2.5-Dev-Mini",
+            "notes": "# 107t/s\n# https://huggingface.co/mudler/KAT-Coder-V2.5-Dev-APEX-GGUF/tree/main\n#/disks/white/cfrankb/models/mudler/KAT-Coder-V2.5-Dev-APEX-GGUF",
             "parameters": [
                 "--fit on",
                 "-c 65536",
@@ -285,6 +293,7 @@
             "description": "Gemma 4 26B latest with MTP draft speculative decoding",
             "model_path": "unsloth/gemma-4-26B-A4B-it/gemma-4-26B-A4B-it-UD-IQ4_NL.gguf",
             "name": "gemma-4-26B-A4B-it-UD-IQ4_NL",
+            "notes": "# this is the newest gemma-4\n# https://www.reddit.com/r/unsloth/comments/1uz0twj/google_gemma_4_now_runs_faster_with_more_accuracy/\n# https://huggingface.co/unsloth/gemma-4-26B-A4B-it-GGUF/tree/main\n# mmproj-F16.gguf\n# max 30 layers\n# 55t/s\n# 50t/s",
             "parameters": [
                 "--model-draft unsloth/gemma-4-26B-A4B-it/mtp-gemma-4-26B-A4B-it.gguf",
                 "--spec-draft-n-max 4",
@@ -311,6 +320,7 @@
             "description": "Grug 27B with MTP draft speculative decoding",
             "model_path": "mradermacher/grug-27b-mtp-i1-GGUF/grug-27b-mtp.i1-IQ3_M.gguf",
             "name": "grug-27b-Q4_K_M",
+            "notes": "#mmproj-grug-27b-f16.gguf\n#https://huggingface.co/ProCreations/grug-27b-gguf/tree/main\n#https://huggingface.co/ProCreations/grug-27b-mtp-gguf/tree/main\n#https://huggingface.co/mradermacher/grug-27b-mtp-i1-GGUF/tree/main\n# 33t/s",
             "parameters": [
                 "--spec-type draft-mtp",
                 "--spec-draft-n-max 2",
@@ -336,8 +346,9 @@
         },
         {
             "description": "Ornith 1.0 35B with MTP draft and 88t/s throughput",
-            "model_path": "unsloth/Ornith-1.0-35B/Ornith-1.0-35B-UD-IQ3_XXS.gguf",
+            "model_path": "Ornith-1.0-35B-MTP-APEX-I-Mini.gguf",
             "name": "ornith-1.0-35b-Q4_K_M",
+            "notes": "#https://huggingface.co/SC117/Ornith-1.0-35B-MTP-APEX-GGUF/tree/main\n #115 - 120t/s\n\n# https://huggingface.co/unsloth/Ornith-1.0-35B-GGUF/tree/main\n# 88t/s\n# mmproj-BF16.gguf\n# imatrix_unsloth.gguf_file (useless)\n#    --mmproj unsloth/Ornith-1.0-35B/mmproj-BF16.gguf \\\n  unsloth/Ornith-1.0-35B/Ornith-1.0-35B-UD-IQ3_XXS.gguf\n",
             "parameters": [
                 "--split-mode layer",
                 "--spec-type draft-mtp",
@@ -395,6 +406,7 @@
             "description": "Muse Glimmer 30B with DFlash draft speculative decoding",
             "model_path": "unsloth/Muse-Glimmer-30B/Muse-Glimmer-30B-UD-IQ3_XXS.gguf",
             "name": "Muse-Glimmer-30B-UD-IQ3_XXS",
+            "notes": "https://huggingface.co/unsloth/Muse-Glimmer-30B-GGUF/tree/main\n\nwith 32gb add mmproj- \n40 to 45 tokens per second ",
             "parameters": [
                 "--model-draft unsloth/Muse-Glimmer-30B/dflash-kquant.gguf",
                 "--spec-type draft-dflash",
@@ -422,6 +434,7 @@
             "description": "NVIDIA Nemotron 3.5 Lightning with 120t/s throughput",
             "model_path": "NVIDIA-Nemotron-3.5-Lightning-30B-A3B-IQ4_XS.gguf",
             "name": "NVIDIA-Nemotron-3.5-Lightning-30B-A3B.iQ4_XS",
+            "notes": "#https://huggingface.co/bartowski/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-GGUF/tree/main\n# 120t/s\n#131072\n#262144",
             "parameters": [
                 "-ngl 99",
                 "--split-mode layer",
@@ -445,6 +458,7 @@
             "description": "Qwen 3.8 27B with MTP draft and kv-unified",
             "model_path": "unsloth/Qwen3.8/Qwen3.8-27B-UD-IQ3_XXS.gguf",
             "name": "Qwen3.8-27B-UD-IQ3_XXS",
+            "notes": "# https://huggingface.co/unsloth/Qwen3.8-27B-GGUF/tree/main\n#Qwen3.8-27B-UD-IQ3_XXS.gguf\n#Qwen3.8-27B-UD-Q3_K_XL.gguf\n# mmproj-BF16.gguf\n# 40t/s",
             "parameters": [
                 "--flash-attn on",
                 "-c 262144",

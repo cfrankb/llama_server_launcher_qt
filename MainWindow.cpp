@@ -207,10 +207,10 @@ void MainWindow::setupCentralWidget()
 
     QGroupBox *metadataGroup(new QGroupBox("Metadata", rightWidget));
     QVBoxLayout *metadataLayout = new QVBoxLayout(metadataGroup);
+    metadataLayout->addWidget(m_statusLabel);
     metadataLayout->addWidget(m_activeProfileLabel);
     metadataLayout->addWidget(m_pathLabel);
     metadataLayout->addWidget(m_modelLabel);
-    metadataLayout->addWidget(m_statusLabel);
     rightLayout->addWidget(metadataGroup);
 
     QGroupBox *controlGroup(new QGroupBox("Controls", rightWidget));
@@ -836,10 +836,10 @@ void MainWindow::refreshProfileList()
         QString name = profile.value("name").toString();
         QString modelPath = ConfigManager::resolvePath(profile.value("model_path").toString(), "");
 
-        QListWidgetItem *item = new QListWidgetItem(name);
-        item->setData(Qt::UserRole, uuid);
-        item->setData(Qt::ToolTipRole, QString("UUID: %1\nModel: %2\nServer: %3")
-            .arg(uuid).arg(modelPath).arg(profile.value("server_uuid").toString()));
+    QListWidgetItem *item = new QListWidgetItem(name);
+    item->setData(Qt::UserRole, uuid);
+    item->setData(Qt::ToolTipRole, QString("UUID: %1\nModel: %2\nServer: %3\nNotes: %4")
+        .arg(uuid).arg(modelPath).arg(profile.value("server_uuid").toString()).arg(profile.value("notes").toString()));
 
         m_profileList->addItem(item);
     }
@@ -864,6 +864,12 @@ void MainWindow::updateMetadataDisplay()
     m_activeProfileLabel->setText("Active Profile: " + name);
     m_pathLabel->setText("Path: ");
     m_modelLabel->setText("Model: " + profile.value("model_path").toString());
+    
+    // Update output with notes
+    QString notes = profile.value("notes").toString();
+    if (!notes.isEmpty()) {
+        updateOutput(QString("\n[NOTES] %1\n").arg(notes));
+    }
 }
 
 void MainWindow::updateServerStateButtons()
@@ -943,7 +949,7 @@ void MainWindow::showEditProfileDialog(const QString &uuid)
 {
     QDialog dialog(this);
     dialog.setWindowTitle(uuid.isEmpty() ? "New Profile" : "Edit Profile");
-    dialog.resize(600, 400);
+    dialog.resize(600, 500);
 
     QFormLayout *form = new QFormLayout(&dialog);
 
@@ -952,7 +958,9 @@ void MainWindow::showEditProfileDialog(const QString &uuid)
     QLineEdit *modelPathEdit = new QLineEdit(&dialog);
     QComboBox *serverSelector = new QComboBox(&dialog);
     QTextEdit *paramsEdit = new QTextEdit(&dialog);
-    paramsEdit->setMinimumHeight(150);
+    QTextEdit *notesEdit = new QTextEdit(&dialog);
+    paramsEdit->setMinimumHeight(100);
+    notesEdit->setMinimumHeight(80);
 
     form->addRow("Name:", nameEdit);
     form->addRow("Description:", descriptionEdit);
@@ -967,6 +975,7 @@ void MainWindow::showEditProfileDialog(const QString &uuid)
     }
     form->addRow("Server:", serverSelector);
     form->addRow("Parameters (one per line):", paramsEdit);
+    form->addRow("Notes:", notesEdit);
 
     QDialogButtonBox *buttonBox = new QDialogButtonBox(
         QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
@@ -994,6 +1003,7 @@ void MainWindow::showEditProfileDialog(const QString &uuid)
                 params.append(val.toString());
             }
             paramsEdit->setPlainText(ConfigManager::joinArguments(params));
+            notesEdit->setPlainText(profile.value("notes").toString());
         }
     }
 
@@ -1009,6 +1019,7 @@ void MainWindow::showEditProfileDialog(const QString &uuid)
         profile["model_path"] = modelPathEdit->text();
         profile["server_uuid"] = serverSelector->currentData().toString();
         profile["parameters"] = QJsonArray::fromStringList(ConfigManager::parseArguments(paramsEdit->toPlainText()));
+        profile["notes"] = notesEdit->toPlainText();
 
         if (uuid.isEmpty()) {
             m_configManager->addProfile(profile);
