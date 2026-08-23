@@ -24,6 +24,8 @@
 #include <QDialogButtonBox>
 #include <QFormLayout>
 
+const char APP_TITLE[] = "Llama Server Launcher";
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , m_menuBar(new QMenuBar(this))
@@ -54,8 +56,9 @@ MainWindow::MainWindow(QWidget *parent)
     , m_currentFilePath("")
     , m_fileModified(false)
 {
-    setWindowTitle("Llama Server Manager");
+    setWindowTitle(APP_TITLE);
     resize(1200, 800);
+    updateWindowTitle();
 
     setupMenuBar();
     setupCentralWidget();
@@ -271,8 +274,7 @@ void MainWindow::onNewFile()
     }
 
     m_currentFilePath = "";
-    m_fileModified = false;
-    m_configManager->setModified(false);
+    setModified(false);
     m_serverList->clear();
     m_profileList->clear();
     m_activeProfileLabel->setText("Active Profile: None");
@@ -284,6 +286,17 @@ void MainWindow::onNewFile()
 
 void MainWindow::onOpenFile()
 {
+    if (m_fileModified) {
+        int reply = QMessageBox::question(this, "Confirm Open File",
+            "Current file has unsaved changes. Continue?",
+            QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+        
+        if (reply == QMessageBox::Cancel) return;
+        if (reply == QMessageBox::Yes) {
+            saveToFile();
+        }
+    }
+
     QString filePath = QFileDialog::getOpenFileName(this,
         "Open Configuration File",
         QDir::currentPath(),
@@ -293,8 +306,7 @@ void MainWindow::onOpenFile()
     if (!filePath.isEmpty()) {
         if (m_configManager->loadFromFile(filePath)) {
             m_currentFilePath = filePath;
-            m_fileModified = false;
-            m_configManager->setModified(false);
+            setModified(false);
             
             // Add to recent files
             m_recentFiles.removeAll(filePath);
@@ -327,8 +339,7 @@ void MainWindow::onSaveFile()
     }
 
     saveToFile();
-    m_fileModified = false;
-    m_configManager->setModified(false);
+    setModified(false);
     updateOutput("Configuration saved.\n");
 }
 
@@ -343,8 +354,7 @@ void MainWindow::onSaveAsFile()
     if (!filePath.isEmpty()) {
         m_currentFilePath = filePath;
         saveToFile();
-        m_fileModified = false;
-        m_configManager->setModified(false);
+        setModified(false);
         
         // Add to recent files
         m_recentFiles.removeAll(filePath);
@@ -361,6 +371,17 @@ void MainWindow::onSaveAsFile()
 
 void MainWindow::onExit()
 {
+    if (m_fileModified) {
+        int reply = QMessageBox::question(this, "Confirm Exit",
+            "Current file has unsaved changes. Save before exiting?",
+            QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+        
+        if (reply == QMessageBox::Cancel) return;
+        if (reply == QMessageBox::Yes) {
+            saveToFile();
+        }
+    }
+
     if (m_activeProcess && m_activeProcess->state() == QProcess::Running) {
         int reply = QMessageBox::question(this, "Confirm Exit",
             "A server is currently running. Stop it and exit?",
@@ -562,8 +583,7 @@ void MainWindow::onDuplicateServer()
     newServer["name"] = newName;
 
     m_configManager->addServer(newServer);
-    m_fileModified = true;
-    m_configManager->setModified(true);
+    setModified(true);
     refreshServerList();
     updateOutput(QString("Server duplicated: %1\n").arg(newName));
 }
@@ -597,8 +617,7 @@ void MainWindow::onDeleteServer()
 
     if (delReply == QMessageBox::Yes) {
         m_configManager->deleteServer(uuid);
-        m_fileModified = true;
-        m_configManager->setModified(true);
+        setModified(true);
         refreshServerList();
         refreshProfileList();
         updateOutput(QString("Server deleted: %1\n").arg(name));
@@ -642,8 +661,7 @@ void MainWindow::onDuplicateProfile()
     newProfile["name"] = newName;
 
     m_configManager->addProfile(newProfile);
-    m_fileModified = true;
-    m_configManager->setModified(true);
+    setModified(true);
     refreshProfileList();
     updateOutput(QString("Profile duplicated: %1\n").arg(newName));
 }
@@ -668,8 +686,7 @@ void MainWindow::onDeleteProfile()
     if (delReply == QMessageBox::Yes) {
         QString uuid = item->data(Qt::UserRole).toString();
         m_configManager->deleteProfile(uuid);
-        m_fileModified = true;
-        m_configManager->setModified(true);
+        setModified(true);
         refreshProfileList();
         updateOutput(QString("Profile deleted: %1\n").arg(name));
     }
@@ -744,14 +761,12 @@ void MainWindow::onProfileSelectionChanged()
 
 void MainWindow::onServerBinaryChanged()
 {
-    m_fileModified = true;
-    m_configManager->setModified(true);
+    setModified(true);
 }
 
 void MainWindow::onModelStateChanged()
 {
-    m_fileModified = true;
-    m_configManager->setModified(true);
+    setModified(true);
 }
 
 void MainWindow::loadFromFile()
@@ -790,6 +805,25 @@ void MainWindow::loadRecentFiles()
     QStringList recent = settings.value("recentFiles").toStringList();
     m_recentFiles = recent;
     updateRecentFilesMenu();
+}
+
+void MainWindow::setModified(bool modified)
+{
+    m_fileModified = modified;
+    m_configManager->setModified(modified);
+    updateWindowTitle();
+}
+
+void MainWindow::updateWindowTitle()
+{
+    QString title = APP_TITLE;
+    if (!m_currentFilePath.isEmpty()) {
+        title += " - " + QFileInfo(m_currentFilePath).fileName();
+    }
+    if (m_fileModified) {
+        title += " *";
+    }
+    setWindowTitle(title);
 }
 
 void MainWindow::saveRecentFiles()
@@ -938,8 +972,7 @@ void MainWindow::showEditServerDialog(const QString &uuid)
             m_configManager->updateServer(uuid, server);
         }
 
-        m_fileModified = true;
-        m_configManager->setModified(true);
+        setModified(true);
         refreshServerList();
         updateOutput(QString("Server %1: %2\n").arg(uuid.isEmpty() ? "added" : "updated").arg(nameEdit->text()));
     }
@@ -1042,8 +1075,7 @@ void MainWindow::showEditProfileDialog(const QString &uuid)
             m_configManager->updateProfile(uuid, profile);
         }
 
-        m_fileModified = true;
-        m_configManager->setModified(true);
+        setModified(true);
         refreshProfileList();
         updateOutput(QString("Profile %1: %2\n").arg(uuid.isEmpty() ? "added" : "updated").arg(nameEdit->text()));
     }

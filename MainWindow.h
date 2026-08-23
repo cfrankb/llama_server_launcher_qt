@@ -99,6 +99,10 @@ private slots:
     void onSaveFile();
     void onSaveAsFile();
     void onExit();
+    
+private:
+    void updateWindowTitle();
+    void setModified(bool modified);
     void onLaunchServer();
     void onStopServer();
     void onAddServer();
