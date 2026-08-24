@@ -99,6 +99,7 @@ private slots:
     void onSaveFile();
     void onSaveAsFile();
     void onExit();
+    void onProfileContextMenu(const QPoint &pos);
     
 private:
     void updateWindowTitle();

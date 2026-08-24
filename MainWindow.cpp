@@ -77,6 +77,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_stopButton, &QPushButton::clicked, this, &MainWindow::onStopServer);
     connect(m_serverList, &QListWidget::itemSelectionChanged, this, &MainWindow::onServerSelectionChanged);
     connect(m_profileList, &QListWidget::itemSelectionChanged, this, &MainWindow::onProfileSelectionChanged);
+    
+    // Setup context menu for profile list
+    m_profileList->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(m_profileList, &QListWidget::customContextMenuRequested, this, &MainWindow::onProfileContextMenu);
 
     connect(m_addServerButton, &QPushButton::clicked, this, &MainWindow::onAddServer);
     connect(m_editServerButton, &QPushButton::clicked, this, &MainWindow::onEditServer);
@@ -251,6 +255,7 @@ void MainWindow::setupCentralWidget()
     profileButtons->addWidget(m_deleteProfileButton);
     profileTabLayout->addLayout(profileButtons);
     m_tabWidget->addTab(profileTabWidget, "Profiles");
+    m_tabWidget->setCurrentIndex(1);
 
     m_mainSplitter->addWidget(m_tabWidget);
     m_mainSplitter->addWidget(rightSplitter);
@@ -759,6 +764,52 @@ void MainWindow::onProfileSelectionChanged()
     updateOutput(QString("Profile selected: %1\n").arg(name));
 }
 
+void MainWindow::onProfileContextMenu(const QPoint &pos)
+{
+    QListWidgetItem *item = m_profileList->itemAt(pos);
+    if (!item) return;
+
+    QString uuid = item->data(Qt::UserRole).toString();
+    
+    QMenu contextMenu(this);
+    
+    QAction *editAction = contextMenu.addAction("Edit");
+    QAction *duplicateAction = contextMenu.addAction("Duplicate");
+    QAction *deleteAction = contextMenu.addAction("Delete");
+    
+    bool isRunning = (m_activeProcess && m_activeProcess->state() == QProcess::Running);
+    QAction *startAction = contextMenu.addAction("Start");
+    // Grey out Start if a server is already running
+    startAction->setEnabled(!isRunning);
+    
+    if (isRunning) {
+        QAction *stopAction = contextMenu.addAction("Stop");
+        QAction *selected = contextMenu.exec(m_profileList->mapToGlobal(pos));
+        if (selected == editAction) {
+            showEditProfileDialog(uuid);
+        } else if (selected == duplicateAction) {
+            onDuplicateProfile();
+        } else if (selected == deleteAction) {
+            onDeleteProfile();
+        } else if (selected == stopAction) {
+            onStopServer();
+        }
+        return;
+    }
+    
+//    QAction *startAction = contextMenu.addAction("Start");
+    QAction *selected = contextMenu.exec(m_profileList->mapToGlobal(pos));
+    if (selected == editAction) {
+        showEditProfileDialog(uuid);
+    } else if (selected == duplicateAction) {
+        onDuplicateProfile();
+    } else if (selected == deleteAction) {
+        onDeleteProfile();
+    } else if (selected == startAction) {
+        onLaunchServer();
+    }
+}
+
 void MainWindow::onServerBinaryChanged()
 {
     setModified(true);
@@ -860,6 +911,13 @@ void MainWindow::refreshServerList()
 
 void MainWindow::refreshProfileList()
 {
+    // Save current selection
+    QListWidgetItem *currentItem = m_profileList->currentItem();
+    QString selectedUuid;
+    if (currentItem) {
+        selectedUuid = currentItem->data(Qt::UserRole).toString();
+    }
+
     m_profileList->clear();
 
     QStringList uuids = m_configManager->getProfileUuids();
@@ -870,12 +928,18 @@ void MainWindow::refreshProfileList()
         QString name = profile.value("name").toString();
         QString modelPath = ConfigManager::resolvePath(profile.value("model_path").toString(), "");
 
-    QListWidgetItem *item = new QListWidgetItem(name);
-    item->setData(Qt::UserRole, uuid);
-    item->setData(Qt::ToolTipRole, QString("UUID: %1\nModel: %2\nServer: %3\nNotes: %4")
-        .arg(uuid).arg(modelPath).arg(profile.value("server_uuid").toString()).arg(profile.value("notes").toString()));
+        QListWidgetItem *item = new QListWidgetItem(name);
+        item->setData(Qt::UserRole, uuid);
+        item->setData(Qt::ToolTipRole, QString("UUID: %1\nModel: %2\nServer: %3\nNotes: %4")
+            .arg(uuid).arg(modelPath).arg(profile.value("server_uuid").toString()).arg(profile.value("notes").toString()));
 
         m_profileList->addItem(item);
+        
+        // Re-select if this is the previously selected item
+        if (!selectedUuid.isEmpty() && uuid == selectedUuid) {
+            m_profileList->setCurrentItem(item);
+            //break;
+        }
     }
 }
 
