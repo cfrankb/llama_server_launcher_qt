@@ -1055,8 +1055,8 @@ void MainWindow::showEditProfileDialog(const QString &uuid)
     QLineEdit *descriptionEdit = new QLineEdit(&dialog);
     QLineEdit *modelPathEdit = new QLineEdit(&dialog);
     QComboBox *serverSelector = new QComboBox(&dialog);
-    QTextEdit *paramsEdit = new QTextEdit(&dialog);
-    QTextEdit *notesEdit = new QTextEdit(&dialog);
+    QPlainTextEdit *paramsEdit = new QPlainTextEdit(&dialog);
+    QPlainTextEdit *notesEdit = new QPlainTextEdit(&dialog);
     paramsEdit->setMinimumHeight(120);
     paramsEdit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     notesEdit->setMinimumHeight(80);

@@ -484,6 +484,42 @@
             ],
             "server_uuid": "{a1b2c3d4-e5f6-7890-abcd-ef1234567890}",
             "uuid": "{d2e3f4a5-b6c7-8901-5678-012345678901}"
+        },
+        {
+            "description": "Ornith 1.0 35B with MTP draft and 88t/s throughput",
+            "model_path": "Ornith-1.5-35B-A3B-APEX-MTP-I-Mini.gguf",
+            "name": "ornith-1.5-35b-Q4_K_M ",
+            "notes": "#https://huggingface.co/SC117/Ornith-1.0-35B-MTP-APEX-GGUF/tree/main\n #115 - 120t/s\n\n-c 163840\n-c 262144\n\n# https://huggingface.co/unsloth/Ornith-1.0-35B-GGUF/tree/main\n# 88t/s\n# mmproj-BF16.gguf\n# imatrix_unsloth.gguf_file (useless)\n#    --mmproj unsloth/Ornith-1.0-35B/mmproj-BF16.gguf \\\n  unsloth/Ornith-1.0-35B/Ornith-1.0-35B-UD-IQ3_XXS.gguf\n",
+            "parameters": [
+                "--split-mode layer",
+                "--spec-type draft-mtp",
+                "--spec-draft-n-max 2",
+                "-t 10",
+                "-np 1",
+                "-c 131072",
+                "--temp 0.6",
+                "--top-p 0.95",
+                "--top-k 20",
+                "--cache-type-k q8_0",
+                "--cache-type-v q8_0",
+                "--spec-draft-type-k q4_0",
+                "--spec-draft-type-v q4_0",
+                "--port 5001",
+                "--host 0.0.0.0",
+                "--cors-origins localhost",
+                "--kv-unified",
+                "--jinja",
+                "--flash-attn on",
+                "--load-mode mmap",
+                "-b 512",
+                "-ub 128",
+                "--cache-reuse 256",
+                "--keep 4096",
+                "--fit on",
+                "--fit-target 100"
+            ],
+            "server_uuid": "{a1b2c3d4-e5f6-7890-abcd-ef1234567890}",
+            "uuid": "d8fd0415-f373-42f5-877e-9112fc5f0197"
         }
     ],
     "servers": [
