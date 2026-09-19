@@ -37,6 +37,7 @@
 #include <QApplication>
 #include <QStatusBar>
 #include <QToolBar>
+#include <QFileDialog>
 #include <QGroupBox>
 #include <QListView>
 #include <QTableView>
@@ -108,10 +109,12 @@ private:
     void onStopServer();
     void onAddServer();
     void onEditServer();
+    void onServerListDoubleClicked(QListWidgetItem *item);
     void onDuplicateServer();
     void onDeleteServer();
     void onAddProfile();
     void onEditProfile();
+    void onProfileListDoubleClicked(QListWidgetItem *item);
     void onDuplicateProfile();
     void onDeleteProfile();
     void updateRecentFilesMenu();
@@ -119,6 +122,8 @@ private:
     void onProfileSelectionChanged();
     void onServerBinaryChanged();
     void onModelStateChanged();
+    void browseForModelFile();
+    void browseForCurrentFolder();
 
 private:
     void setupMenuBar();
@@ -165,6 +170,8 @@ private:
     QStringList m_recentFiles;
     QString m_currentFilePath;
     bool m_fileModified;
+    QLineEdit *m_currentModelPathEdit;
+    QLineEdit *m_currentFolderPathEdit;
 
     QProcess *m_activeProcess;
 };

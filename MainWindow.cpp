@@ -55,6 +55,8 @@ MainWindow::MainWindow(QWidget *parent)
     , m_activeProcess(nullptr)
     , m_currentFilePath("")
     , m_fileModified(false)
+    , m_currentModelPathEdit(nullptr)
+    , m_currentFolderPathEdit(nullptr)
 {
     setWindowTitle(APP_TITLE);
     resize(1200, 800);
@@ -81,9 +83,11 @@ MainWindow::MainWindow(QWidget *parent)
     // Setup context menu for profile list
     m_profileList->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_profileList, &QListWidget::customContextMenuRequested, this, &MainWindow::onProfileContextMenu);
+    connect(m_profileList, &QListWidget::itemDoubleClicked, this, &MainWindow::onProfileListDoubleClicked);
 
     connect(m_addServerButton, &QPushButton::clicked, this, &MainWindow::onAddServer);
     connect(m_editServerButton, &QPushButton::clicked, this, &MainWindow::onEditServer);
+    connect(m_serverList, &QListWidget::itemDoubleClicked, this, &MainWindow::onServerListDoubleClicked);
     connect(m_duplicateServerButton, &QPushButton::clicked, this, &MainWindow::onDuplicateServer);
     connect(m_deleteServerButton, &QPushButton::clicked, this, &MainWindow::onDeleteServer);
     connect(m_addProfileButton, &QPushButton::clicked, this, &MainWindow::onAddProfile);
@@ -589,6 +593,17 @@ void MainWindow::onEditServer()
     showEditServerDialog(uuid);
 }
 
+void MainWindow::onServerListDoubleClicked(QListWidgetItem *item)
+{
+    if (!item) {
+        QMessageBox::warning(this, "Warning", "Please select a server to edit.");
+        return;
+    }
+
+    QString uuid = item->data(Qt::UserRole).toString();
+    showEditServerDialog(uuid);
+}
+
 void MainWindow::onDuplicateServer()
 {
     QListWidgetItem *item = m_serverList->currentItem();
@@ -658,6 +673,17 @@ void MainWindow::onAddProfile()
 void MainWindow::onEditProfile()
 {
     QListWidgetItem *item = m_profileList->currentItem();
+    if (!item) {
+        QMessageBox::warning(this, "Warning", "Please select a profile to edit.");
+        return;
+    }
+
+    QString uuid = item->data(Qt::UserRole).toString();
+    showEditProfileDialog(uuid);
+}
+
+void MainWindow::onProfileListDoubleClicked(QListWidgetItem *item)
+{
     if (!item) {
         QMessageBox::warning(this, "Warning", "Please select a profile to edit.");
         return;
@@ -1012,13 +1038,20 @@ void MainWindow::showEditServerDialog(const QString &uuid)
     QLineEdit *binaryPathEdit = new QLineEdit(&dialog);
     QLineEdit *searchPathEdit = new QLineEdit(&dialog);
     QLineEdit *currentFolderEdit = new QLineEdit(&dialog);
+    QPushButton *currentFolderBrowseButton = new QPushButton("Browse...", &dialog);
     QLineEdit *descriptionEdit = new QLineEdit(&dialog);
     QPlainTextEdit *envEdit = new QPlainTextEdit(&dialog);
 
     form->addRow("Name:", nameEdit);
     form->addRow("Binary Path:", binaryPathEdit);
     form->addRow("Search Path:", searchPathEdit);
-    form->addRow("Current Folder:", currentFolderEdit);
+    QHBoxLayout *folderLayout = new QHBoxLayout;
+    folderLayout->addWidget(currentFolderEdit);
+    folderLayout->addWidget(currentFolderBrowseButton);
+    form->addRow("Current Folder:", folderLayout);
+
+    connect(currentFolderBrowseButton, &QPushButton::clicked, this, &MainWindow::browseForCurrentFolder);
+    m_currentFolderPathEdit = currentFolderEdit;
     form->addRow("Description:", descriptionEdit);
     form->addRow("Environment (one per line):", envEdit);
 
@@ -1087,6 +1120,7 @@ void MainWindow::showEditProfileDialog(const QString &uuid)
     QLineEdit *nameEdit = new QLineEdit(&dialog);
     QLineEdit *descriptionEdit = new QLineEdit(&dialog);
     QLineEdit *modelPathEdit = new QLineEdit(&dialog);
+    QPushButton *browseModelButton = new QPushButton("Browse...", &dialog);
     QComboBox *serverSelector = new QComboBox(&dialog);
     QPlainTextEdit *paramsEdit = new QPlainTextEdit(&dialog);
     QPlainTextEdit *notesEdit = new QPlainTextEdit(&dialog);
@@ -1097,7 +1131,13 @@ void MainWindow::showEditProfileDialog(const QString &uuid)
 
     form->addRow("Name:", nameEdit);
     form->addRow("Description:", descriptionEdit);
-    form->addRow("Model Path:", modelPathEdit);
+    QHBoxLayout *modelLayout = new QHBoxLayout;
+    modelLayout->addWidget(modelPathEdit);
+    modelLayout->addWidget(browseModelButton);
+    form->addRow("Model Path:", modelLayout);
+
+    connect(browseModelButton, &QPushButton::clicked, this, &MainWindow::browseForModelFile);
+    m_currentModelPathEdit = modelPathEdit;
 
     QStringList serverUuids = m_configManager->getServerUuids();
     for (const QString &sUuid : serverUuids) {
@@ -1175,5 +1215,42 @@ void MainWindow::showEditProfileDialog(const QString &uuid)
         setModified(true);
         refreshProfileList();
         updateOutput(QString("Profile %1: %2\n").arg(uuid.isEmpty() ? "added" : "updated").arg(nameEdit->text()));
+    }
+}
+
+void MainWindow::browseForModelFile()
+{
+    if (m_currentModelPathEdit == nullptr) {
+        return;
+    }
+
+    const QString startDir = m_currentModelPathEdit->text().isEmpty()
+        ? QDir::currentPath()
+        : QFileInfo(m_currentModelPathEdit->text()).absolutePath();
+
+    const QString file = QFileDialog::getOpenFileName(
+        this,
+        tr("Select Model File"),
+        startDir,
+        tr("Model files (*.gguf *.bin *.pt *.onnx *);;All files (*)"));
+
+    if (!file.isEmpty()) {
+        m_currentModelPathEdit->setText(file);
+    }
+}
+
+void MainWindow::browseForCurrentFolder()
+{
+    const QString startDir = m_currentFolderPathEdit->text().isEmpty()
+        ? QDir::currentPath()
+        : QFileInfo(m_currentFolderPathEdit->text()).absolutePath();
+
+    const QString folder = QFileDialog::getExistingDirectory(
+        this,
+        tr("Select Current Folder"),
+        startDir);
+
+    if (!folder.isEmpty()) {
+        m_currentFolderPathEdit->setText(folder);
     }
 }
