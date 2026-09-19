@@ -350,13 +350,17 @@ void MainWindow::onSaveFile()
 
 void MainWindow::onSaveAsFile()
 {
+    const QString path = m_currentFilePath.isEmpty()?QDir::currentPath() :m_currentFilePath;
     QString filePath = QFileDialog::getSaveFileName(this,
         "Save Configuration As",
-        QDir::currentPath(),
+        path,
         "JSON Files (*.json);;All Files (*)"
     );
 
     if (!filePath.isEmpty()) {
+        if (!filePath.endsWith(".json")) {
+            filePath += ".json";
+        }
         m_currentFilePath = filePath;
         saveToFile();
         setModified(false);
@@ -477,6 +481,23 @@ void MainWindow::onLaunchServer()
     } else {
         env.insert("LD_LIBRARY_PATH", binaryDir);
     }
+
+
+    QJsonArray envArray = server.value("env").toArray();
+    qDebug("env size: %llu", envArray.size());
+    for (const QJsonValue &val : envArray) {
+         QStringList envPairs = val.toString().split("=", Qt::SkipEmptyParts);
+        if (envPairs.size() == 2) {
+            env.insert(envPairs[0], envPairs[1]);
+            updateOutput(QString("[INFO] env: `%1`").arg(val.toString()));
+        } else {
+            updateOutput(QString("[ERROR] invalid env: `%1` contain %2 pairs").arg(val.toString()).arg(envPairs.size())) ;
+        }
+    }
+
+//    env.insert("GGML_CUDA_DISABLE_GRAPHS", "1");
+//    env.insert("GGML_CUDA_ENABLE_NCCL", "1"); // Forces fast multi-GPU communication
+//    env.insert("CUDA_LAUNCH_BLOCKING", "0"); // Keeps Qt thread asynchronous
     m_activeProcess->setProcessEnvironment(env);
 
     connect(m_activeProcess, &QProcess::readyReadStandardOutput, this, [this]() {
@@ -992,12 +1013,14 @@ void MainWindow::showEditServerDialog(const QString &uuid)
     QLineEdit *searchPathEdit = new QLineEdit(&dialog);
     QLineEdit *currentFolderEdit = new QLineEdit(&dialog);
     QLineEdit *descriptionEdit = new QLineEdit(&dialog);
+    QPlainTextEdit *envEdit = new QPlainTextEdit(&dialog);
 
     form->addRow("Name:", nameEdit);
     form->addRow("Binary Path:", binaryPathEdit);
     form->addRow("Search Path:", searchPathEdit);
     form->addRow("Current Folder:", currentFolderEdit);
     form->addRow("Description:", descriptionEdit);
+    form->addRow("Environment (one per line):", envEdit);
 
     QDialogButtonBox *buttonBox = new QDialogButtonBox(
         QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
@@ -1014,6 +1037,11 @@ void MainWindow::showEditServerDialog(const QString &uuid)
             searchPathEdit->setText(server.value("search_path").toString());
             currentFolderEdit->setText(server.value("current_folder").toString());
             descriptionEdit->setText(server.value("description").toString());
+            QStringList envList;
+            for (const QJsonValue &envVal : server.value("env").toArray()) {
+                envList.append(envVal.toString());
+            }
+            envEdit->setPlainText(ConfigManager::joinArguments(envList));
         }
     }
 
@@ -1029,6 +1057,11 @@ void MainWindow::showEditServerDialog(const QString &uuid)
         server["search_path"] = searchPathEdit->text();
         server["current_folder"] = currentFolderEdit->text();
         server["description"] = descriptionEdit->text();
+        QJsonArray envArray;
+        for (const QString &envLine : ConfigManager::parseArguments(envEdit->toPlainText())) {
+            envArray.append(envLine);
+        }
+        server["env"] = envArray;
 
         if (uuid.isEmpty()) {
             m_configManager->addServer(server);

@@ -524,7 +524,7 @@
             "description": "",
             "model_path": "/run/media/cfrankb/HF_HOME/models/K2-Horizon-MoVA-36B-A4B-Q3_K_M.gguf",
             "name": "K2-Horizon-MoVA-36B-A4B-Q3_K_M",
-            "notes": "0.00.575.560 E llama_model_load: error loading model: unknown model architecture: 'k2-horizon'\n\n66t/s\nwill need more than 32gb of vram for extra context",
+            "notes": "0.00.575.560 E llama_model_load: error loading model: unknown model architecture: 'k2-horizon'\n\n66t/s\nwill need more than 32gb of vram for extra context\n\nhttps://huggingface.co/abenzerps/K2-Horizon-MoVA-36B-A4B-GGUF/tree/main",
             "parameters": [
                 "-np 1",
                 "-ngl 99",
@@ -547,26 +547,51 @@
             "description": "",
             "model_path": "Qwen3.8-27B-Ultra-Uncensored-Heretic-Native-MTP-Preserved-Q3_K_M.gguf",
             "name": "Qwen3.8-27B-Ultra-Uncensored-Heretic-Native-MTP-Preserved-GGUF ",
-            "notes": "45t/s",
+            "notes": "45t/s\n\n\n-b 512\n-ub 1024\n\n",
             "parameters": [
                 "--flash-attn on",
                 "--jinja",
-                "--spec-type draft-mtp",
-                "--spec-draft-n-max 2",
                 "-c 65536",
-                "-t 6",
-                "-b 512",
-                "-ub 1024",
+                "-t 2",
+                "-b 1024",
+                "-ub 64",
                 "--cache-type-k q8_0",
                 "--cache-type-v q8_0",
+                "--spec-type draft-mtp",
+                "--spec-draft-n-max 2",
                 "-np 1",
                 "--tensor-split 1,1",
                 "--split-mode layer",
+                "--ctx-checkpoints 0",
+                "--reasoning auto",
                 "--host 0.0.0.0",
-                "--port 5001"
+                "--port 5001",
+                "--kv-unified",
+                "--agent"
             ],
             "server_uuid": "{a1b2c3d4-e5f6-7890-abcd-ef1234567890}",
             "uuid": "ce8d96f1-7ca6-4bb3-968e-1e94fcb90157"
+        },
+        {
+            "description": "",
+            "model_path": "/run/media/cfrankb/HF_HOME/models/Spark-X2.5-4B-Q8_0.gguf",
+            "name": "Spark-X2.5-4B-GGUF",
+            "notes": "hf download hf://XHToken/Spark-X2.5-4B-GGUF/Spark-X2.5-4B-Q8_0.gguf --local-dir .\n\nhttps://huggingface.co/XHToken/Spark-X2.5-4B-GGUF\n\n-sm row\n-c 131072\n-ub 1024\n-b 2048\n",
+            "parameters": [
+                "--host 0.0.0.0",
+                "--port 5001",
+                "-ngl 99",
+                "-c 131072",
+                "-fa 1",
+                "-b 512,",
+                "-ub 512",
+                "-t 4",
+                "--flash-attn on",
+                "-ctk q8_0",
+                "-ctv q8_0"
+            ],
+            "server_uuid": "{a1b2c3d4-e5f6-7890-abcd-ef1234567890}",
+            "uuid": "e76e6c5e-5cc8-4fb0-9654-90e2e69ec497"
         }
     ],
     "servers": [
@@ -574,6 +599,14 @@
             "binary_path": "./bin/llama-server",
             "current_folder": "/run/media/cfrankb/HF_HOME/models",
             "description": "Default llama-server binary with common models",
+            "env": [
+                "GGML_CUDA_DISABLE_GRAPHS=1",
+                "GGML_CUDA_ENABLE_NCCL=1",
+                "CUDA_LAUNCH_BLOCKING=1",
+                "DGGML_CUDA_ENABLE_UNIFIED_MEMORY=0",
+                "GGML_CUDA_FORCE_CUBLAS=1",
+                "PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True"
+            ],
             "name": "Llama Server (Default)",
             "search_path": "./bin",
             "uuid": "{a1b2c3d4-e5f6-7890-abcd-ef1234567890}"
