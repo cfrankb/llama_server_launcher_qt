@@ -158,6 +158,17 @@ bool ConfigManager::addServer(const QJsonObject &server)
     return true;
 }
 
+bool ConfigManager::insertServer(const int i, const QJsonObject &server)
+{
+    QJsonObject root = m_document.object();
+    QJsonArray servers = root.value("servers").toArray();
+    servers.insert(i, server);
+    root["servers"] = servers;
+    m_document = QJsonDocument(root);
+    m_modified = true;
+    return true;
+}
+
 bool ConfigManager::updateServer(const QString &uuid, const QJsonObject &server)
 {
     QJsonObject root = m_document.object();
@@ -222,6 +233,29 @@ QJsonObject ConfigManager::getServer(const QString &uuid) const
     return QJsonObject();
 }
 
+int ConfigManager::getServerIndex(const QString &uuid) const
+{
+    QJsonObject root = m_document.object();
+    QJsonArray servers = root.value("servers").toArray();
+
+    int i = 0;
+    for (const QJsonValue &val : servers) {
+        QJsonObject s = val.toObject();
+        if (s.value("uuid").toString() == uuid) {
+            return i;
+        }
+        ++i;
+    }
+    return -1;
+}
+
+size_t ConfigManager::serverCount() const
+{
+    QJsonObject root = m_document.object();
+    QJsonArray servers = root.value("servers").toArray();
+    return servers.size();
+}
+
 QStringList ConfigManager::getServerUuids() const
 {
     QStringList result;
@@ -244,6 +278,24 @@ bool ConfigManager::addProfile(const QJsonObject &profile)
     m_document = QJsonDocument(root);
     m_modified = true;
     return true;
+}
+
+bool ConfigManager::insertProfile(const int i, const QJsonObject &profile)
+{
+    QJsonObject root = m_document.object();
+    QJsonArray profiles = root.value("profiles").toArray();
+    profiles.insert(i, profile);
+    root["profiles"] = profiles;
+    m_document = QJsonDocument(root);
+    m_modified = true;
+    return true;
+}
+
+size_t ConfigManager::profileCount() const
+{
+    QJsonObject root = m_document.object();
+    QJsonArray profiles = root.value("profiles").toArray();
+    return profiles.size();
 }
 
 bool ConfigManager::updateProfile(const QString &uuid, const QJsonObject &profile)
@@ -309,6 +361,23 @@ QJsonObject ConfigManager::getProfile(const QString &uuid) const
     }
     return QJsonObject();
 }
+
+int ConfigManager::getProfileIndex(const QString &uuid) const
+{
+    QJsonObject root = m_document.object();
+    QJsonArray profiles = root.value("profiles").toArray();
+
+    int i =0;
+    for (const QJsonValue &val : profiles) {
+        QJsonObject p = val.toObject();
+        if (p.value("uuid").toString() == uuid) {
+            return i;
+        }
+        ++i;
+    }
+    return -1;
+}
+
 
 QStringList ConfigManager::getProfileUuids() const
 {

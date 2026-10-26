@@ -41,17 +41,23 @@ public:
     static QJsonObject jsonToProfile(const QJsonObject &json);
 
     bool addServer(const QJsonObject &server);
+    bool insertServer(const int i, const QJsonObject &server);
     bool updateServer(const QString &uuid, const QJsonObject &server);
     bool deleteServer(const QString &uuid);
     bool serverExists(const QString &uuid) const;
     QJsonObject getServer(const QString &uuid) const;
+    int getServerIndex(const QString &uuid) const;
     QStringList getServerUuids() const;
+    size_t serverCount() const;
 
     bool addProfile(const QJsonObject &profile);
+    bool insertProfile(const int i, const QJsonObject &profile);
     bool updateProfile(const QString &uuid, const QJsonObject &profile);
     bool deleteProfile(const QString &uuid);
     bool profileExists(const QString &uuid) const;
+    size_t profileCount() const;
     QJsonObject getProfile(const QString &uuid) const;
+    int getProfileIndex(const QString &uuid) const;
     QStringList getProfileUuids() const;
 
     bool hasReferencesToServer(const QString &serverUuid) const;

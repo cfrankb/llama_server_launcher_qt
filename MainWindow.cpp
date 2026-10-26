@@ -616,14 +616,20 @@ void MainWindow::onDuplicateServer()
     QJsonObject server = m_configManager->getServer(uuid);
     if (server.isEmpty()) return;
 
+    int i = m_configManager->getServerIndex(uuid);
+    if (i == -1) return;
     QString originalName = server.value("name").toString();
     QString newName = originalName + " - Copy";
 
     QJsonObject newServer = server;
     newServer["uuid"] = ConfigManager::generateUuid();
     newServer["name"] = newName;
-
-    m_configManager->addServer(newServer);
+    qDebug("index: %d; servers: %lu", i, m_configManager->serverCount());
+    if (m_configManager->serverCount() == i + 1) {
+        m_configManager->addServer(newServer);
+    } else {
+        m_configManager->insertServer(i + 1, newServer);
+    }
     setModified(true);
     refreshServerList();
     updateOutput(QString("Server duplicated: %1\n").arg(newName));
@@ -702,6 +708,8 @@ void MainWindow::onDuplicateProfile()
     }
 
     QString uuid = item->data(Qt::UserRole).toString();
+    int i = m_configManager->getProfileIndex(uuid);
+    if (i == -1) return;
     QJsonObject profile = m_configManager->getProfile(uuid);
     if (profile.isEmpty()) return;
 
@@ -711,8 +719,12 @@ void MainWindow::onDuplicateProfile()
     QJsonObject newProfile = profile;
     newProfile["uuid"] = ConfigManager::generateUuid();
     newProfile["name"] = newName;
+    if (m_configManager->profileCount() == i + 1) {
+        m_configManager->addProfile(newProfile);
+    } else {
+        m_configManager->insertProfile(i + 1,newProfile);
+    }
 
-    m_configManager->addProfile(newProfile);
     setModified(true);
     refreshProfileList();
     updateOutput(QString("Profile duplicated: %1\n").arg(newName));
