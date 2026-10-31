@@ -11,6 +11,8 @@ A Qt6 application for managing and launching llama server configurations.
 - **Configuration Storage**: Configs stored as JSON on disk
 - **Server Binary Selection**: Global setting for server binary path with multiple options
 
+![alt text](techdocs/images/20261031_063510-crop25x.jpg)
+
 ## Building
 
 ```bash

@@ -453,7 +453,8 @@
                 "-ub 512",
                 "--fit on",
                 "--fit-target 400",
-                "--port 5001"
+                "--port 5001",
+                "--cont-batching"
             ],
             "server_uuid": "{a1b2c3d4-e5f6-7890-abcd-ef1234567890}",
             "uuid": "{b0c1d2e3-f4a5-6789-3456-890123456789}"
@@ -593,7 +594,8 @@
                 "--port 5001",
                 "--kv-unified",
                 "--agent",
-                "--reasoning-budget 4096"
+                "--reasoning-budget 4096",
+                "--cont-batching"
             ],
             "server_uuid": "{a1b2c3d4-e5f6-7890-abcd-ef1234567890}",
             "uuid": "ce8d96f1-7ca6-4bb3-968e-1e94fcb90157"
@@ -644,12 +646,12 @@
             "description": "",
             "model_path": "/run/media/cfrankb/HF_HOME/models/ukisai/Swift-1.5-Qwen3.8-27B-GGUF/Swift-1.5-Qwen3.8-27B-IQ4_XS.gguf",
             "name": "Swift-1.5-Qwen3.8-27B-GGUF",
-            "notes": "https://huggingface.co/ukisai/Swift-1.5-Qwen3.8-27B-GGUF/tree/main\n\n23t/s\n37t/s\n\n--spec-type draft-simple\n--spec-draft-n-max 2\n--spec-draft-p-min 0.75\n\n--spec-type draft-mtp\n--spec-draft-n-max 3\n--spec-draft-p-min 0.75\n\n-c 73728\n",
+            "notes": "https://huggingface.co/ukisai/Swift-1.5-Qwen3.8-27B-GGUF/tree/main\n\n23t/s\n37t/s\n\n--spec-type draft-simple\n--spec-draft-n-max 2\n--spec-draft-p-min 0.75\n\n--spec-type draft-mtp\n--spec-draft-n-max 3\n--spec-draft-p-min 0.75\n\n-c 73728\n-c 200000\n-c 131072\n\n\n--split-mode layer",
             "parameters": [
                 "--flash-attn on",
                 "--jinja",
-                "-t 10",
-                "-tb 10",
+                "-t 6",
+                "-tb 8",
                 "-b 1024",
                 "-ub 512",
                 "--load-mode mlock",
@@ -664,8 +666,9 @@
                 "--spec-type draft-mtp",
                 "--spec-draft-n-max 2",
                 "--spec-draft-p-min 0.75",
-                "-c 200000",
-                "--cont-batching"
+                "-c 331072",
+                "--cont-batching",
+                "-np 2"
             ],
             "server_uuid": "{a1b2c3d4-e5f6-7890-abcd-ef1234567890}",
             "uuid": "7a25f139-e311-408d-9b5e-ecb72a5c6e1a"
